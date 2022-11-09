@@ -1,0 +1,6 @@
+#ignore backup files
+*.idx
+*.bak
+
+#ignore test directory
+test/
