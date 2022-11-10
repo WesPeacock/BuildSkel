@@ -24,11 +24,10 @@ use Data::Dumper qw(Dumper);
 
 use File::Basename;
 my $scriptname = fileparse($0, qr/\.[^.]*/); # script name without the .pl
-
 use Getopt::Long;
 GetOptions (
 	'inifile:s'   => \(my $inifilename = "$scriptname.ini"), # ini filename
-	'section:s'   => \(my $inisection = "section"), # section of ini file to use
+	'section:s'   => \(my $inisection = "BuildSkel"), # section of ini file to use
 # additional options go here.
 # 'sampleoption:s' => \(my $sampleoption = "optiondefault"),
 	'recmark:s' => \(my $recmark = "lx"), # record marker, default lx
@@ -38,9 +37,10 @@ GetOptions (
 
 	# Be aware # is the bash comment character, so quote it if you want to specify it.
 	#	Better yet, just don't specify it -- it's the default.
-	'debug'       => \my $debug,
+	'debug'       => \my $debug
 	) or die $USAGE;
 
+say STDERR "recmark:$recmark" if $debug;
 # check your options and assign their information to variables here
 $recmark =~ s/[\\ ]//g; # no backslashes or spaces in record marker
 
@@ -50,10 +50,22 @@ $recmark =~ s/[\\ ]//g; # no backslashes or spaces in record marker
 use Config::Tiny;
 my $config = Config::Tiny->read($inifilename, 'crlf');
 die "Quitting: couldn't find the INI file $inifilename\n$USAGE\n" if !$config;
-my $param1 = $config->{"$inisection"}->{Param1};
-say STDERR "Param1:$param1" if $debug;
-my $param2 = $config->{"$inisection"}->{Param2};
-say STDERR "Param2:$param2" if $debug;
+say STDERR "Section mark:$inisection" if $debug;
+my $fieldmarks = $config->{"$inisection"}->{fieldmarks};
+say STDERR "Field marks before cleanup:$fieldmarks" if $debug;
+for ($fieldmarks) {
+	# remove backslashes and spaces from the SFMs in the INI file
+	say STDERR $_ if $debug;
+	$fieldmarks =~ s/\\//g;
+	$fieldmarks =~ s/ //g;
+	$fieldmarks =~ s/\,*$//; # no trailing commas
+	$fieldmarks =~ s/\,/\|/g;  # use bars for or'ing
+	}
+say STDERR "Fieldmarks after cleanup:$fieldmarks" if $debug;
+my $srchFieldmarks = qr/$fieldmarks/;
+say STDERR "Fieldmarks RE after cleanup:$srchFieldmarks" if $debug;
+
+
 # =cut
 
 # generate array of the input file with one SFM record per line (opl)
@@ -76,17 +88,32 @@ push @opledfile_in, $line;
 for my $oplline (@opledfile_in) {
 # Insert code here to perform on each opl'ed line.
 # Note that a next command will prevent the line from printing
+
+say STDERR "oplline before skel:", Dumper($oplline) if $debug;
 my $skel =$oplline;
 $skel =~ s/#/ /g;
 my @skel_array = split (" ", $skel);
+
 for my  $skel_item (@skel_array) {
 	$skel_item =~ s/^[^\\].*//;
 	}
 $skel=join(" ",@skel_array);
 $skel =~ s/ +/ /g;
 $skel =~ s/\\//g;
+$skel =~ s/\ $//;
 # say "SKEL:$skel";
-$oplline =~  s/#/#\\skel $skel#/;
+$oplline =~  s/#/#\\skel_all $skel#/;
+@skel_array = split (" ", $skel);
+for my  $skel_item (@skel_array) {
+	if (! ($skel_item =~ m/$srchFieldmarks/)) {
+		$skel_item ="";
+		}
+	}
+$skel=join(" ",@skel_array);
+$skel =~ s/ +/ /g;
+$skel =~ s/\ $//;
+$oplline =~  s/#/#\\skel_part $skel#/;
+
 say STDERR "oplline:", Dumper($oplline) if $debug;
 #de_opl this line
 	for ($oplline) {
