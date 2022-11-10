@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-my $USAGE = "Usage: $0 [--inifile inifile.ini] [--section section] [--recmark lx] [--eolrep #] [--reptag __hash__] [--debug] [file.sfm]";
+my $USAGE = "Usage: $0 [--inifile inifile.ini] [--section section] [--recmark lx] [--eolrep #] [--reptag __hash__] [--help] [--debug] [file.sfm]";
 =pod
 This script is a stub that provides the code for opl'ing and de_opl'ing an input file
 It also includes code to:
@@ -37,8 +37,15 @@ GetOptions (
 
 	# Be aware # is the bash comment character, so quote it if you want to specify it.
 	#	Better yet, just don't specify it -- it's the default.
+	'help'    => \my $help,
 	'debug'       => \my $debug
 	) or die $USAGE;
+
+if ($help) {
+	say STDERR $USAGE;
+	say STDERR "A script that builds skeleton fielda for each SFM record. One skeleton field contains a list of all of the SMFs and the other contains some of the SFMs.";
+	exit;
+	}
 
 say STDERR "recmark:$recmark" if $debug;
 # check your options and assign their information to variables here
