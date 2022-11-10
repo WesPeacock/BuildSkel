@@ -76,7 +76,17 @@ push @opledfile_in, $line;
 for my $oplline (@opledfile_in) {
 # Insert code here to perform on each opl'ed line.
 # Note that a next command will prevent the line from printing
-
+my $skel =$oplline;
+$skel =~ s/#/ /g;
+my @skel_array = split (" ", $skel);
+for my  $skel_item (@skel_array) {
+	$skel_item =~ s/^[^\\].*//;
+	}
+$skel=join(" ",@skel_array);
+$skel =~ s/ +/ /g;
+$skel =~ s/\\//g;
+# say "SKEL:$skel";
+$oplline =~  s/#/#\\skel $skel#/;
 say STDERR "oplline:", Dumper($oplline) if $debug;
 #de_opl this line
 	for ($oplline) {
