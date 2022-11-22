@@ -112,7 +112,7 @@ $skel =~ s/\ $//;
 $oplline =~  s/#/#\\skel_all $skel#/;
 @skel_array = split (" ", $skel);
 for my  $skel_item (@skel_array) {
-	if (! ($skel_item =~ m/$srchFieldmarks/)) {
+	if (! ($skel_item =~ m/^$srchFieldmarks$/)) {
 		$skel_item ="";
 		}
 	}
