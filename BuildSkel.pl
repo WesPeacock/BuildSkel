@@ -98,6 +98,7 @@ for my $oplline (@opledfile_in) {
 
 say STDERR "oplline before skel:", Dumper($oplline) if $debug;
 my $skel =$oplline;
+$skel =~ s/[^#]\\//g;
 $skel =~ s/#/ /g;
 my @skel_array = split (" ", $skel);
 
