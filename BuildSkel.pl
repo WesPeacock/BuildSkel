@@ -43,7 +43,7 @@ GetOptions (
 
 if ($help) {
 	say STDERR $USAGE;
-	say STDERR "A script that builds skeleton fielda for each SFM record. One skeleton field contains a list of all of the SMFs and the other contains some of the SFMs.";
+	say STDERR "A script that builds skeleton fields for each SFM record. One skeleton field contains a list of all of the SMFs and the other contains some of the SFMs.";
 	exit;
 	}
 
